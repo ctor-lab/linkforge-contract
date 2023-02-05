@@ -2,8 +2,11 @@
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
+import {GelatoRelayContext} from "@gelatonetwork/relay-context/contracts/GelatoRelayContext.sol";
 
-abstract contract Claimable {
+abstract contract Claimable is GelatoRelayContext{
+    bool public gelatoRelayEnabled;
+
     address private defaultCertificateAuthority;
     mapping(address => bool) private usedSigner;
 
@@ -11,6 +14,7 @@ abstract contract Claimable {
     error ZeroAddress();
     error InvalidCertificate();
     error InvalidSignature();
+    error GelatoRelayNotEnabled();
 
     function claim(address claimant, address signer, uint64 deadline, bytes calldata data, bytes calldata signature, bytes calldata certificate) public {
         bytes32 certificateHash = _verifyCertificate(signer, deadline, data, certificate);
@@ -23,7 +27,21 @@ abstract contract Claimable {
         _processClaim(claimant, data);
     }
 
+    function claimThroughRelay(address claimant, address signer, uint64 deadline, bytes calldata data, bytes calldata signature, bytes calldata certificate) 
+        external onlyGelatoRelay {
+        if (!gelatoRelayEnabled) revert GelatoRelayNotEnabled();
+        
+        claim(claimant, signer, deadline, data, signature, certificate);
+        
+        _beforeTransferRelayFee();
+        _transferRelayFee();
+    }
+
+
     function _processClaim(address claimant, bytes calldata data) internal virtual;
+
+
+    function _beforeTransferRelayFee() internal virtual {}
 
     function isUsedSigner(address signer) public view returns (bool) {
         return usedSigner[signer];
@@ -60,4 +78,6 @@ abstract contract Claimable {
 
         if(ECDSAUpgradeable.recover(signautureHash, signature) != signer) revert InvalidSignature();
     }
+
+    function withdrawIERC20() {}
 }

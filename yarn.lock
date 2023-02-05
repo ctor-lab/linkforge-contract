@@ -344,6 +344,13 @@
     "@ethersproject/properties" "^5.7.0"
     "@ethersproject/strings" "^5.7.0"
 
+"@gelatonetwork/relay-context@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@gelatonetwork/relay-context/-/relay-context-2.1.0.tgz#46eef1162c7dca16031baeb528edceca686d9a3e"
+  integrity sha512-Pisn66Haq1OEBqrj9t8aPS2B7qX1j/AI0mDZNczeAws8JMn7PhZXLKcWYleAWUitlzFS59w4qS3Y/l7/8oWEiw==
+  dependencies:
+    "@openzeppelin/contracts" "4.8.0"
+
 "@metamask/eth-sig-util@^4.0.0":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@metamask/eth-sig-util/-/eth-sig-util-4.0.1.tgz#3ad61f6ea9ad73ba5b19db780d40d9aae5157088"
@@ -646,6 +653,11 @@
   version "4.8.1"
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-upgradeable/-/contracts-upgradeable-4.8.1.tgz#363f7dd08f25f8f77e16d374350c3d6b43340a7a"
   integrity sha512-1wTv+20lNiC0R07jyIAbHU7TNHKRwGiTGRfiNnA8jOWjKT98g5OgLpYWOi40Vgpk8SPLA9EvfJAbAeIyVn+7Bw==
+
+"@openzeppelin/contracts@4.8.0":
+  version "4.8.0"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.8.0.tgz#6854c37df205dd2c056bdfa1b853f5d732109109"
+  integrity sha512-AGuwhRRL+NaKx73WKRNzeCxOCOCxpaqF+kp8TJ89QzAipSwZy/NoflkWaL9bywXFRhIzXt8j38sfF7KBKCPWLw==
 
 "@openzeppelin/contracts@^4.8.1":
   version "4.8.1"
@@ -1738,6 +1750,11 @@ env-paths@^2.2.0:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/env-paths/-/env-paths-2.2.1.tgz#420399d416ce1fbe9bc0a07c62fa68d67fd0f8f2"
   integrity sha512-+h1lkLKhZMTYjog1VEpJNG7NZJWcuc2DDk/qsqSTRRCOXiLjeQ1d1/udrUGhqMxUgAlwKNZ0cf2uqan5GLuS2A==
+
+erc721a-upgradeable@^4.2.3:
+  version "4.2.3"
+  resolved "https://registry.yarnpkg.com/erc721a-upgradeable/-/erc721a-upgradeable-4.2.3.tgz#9e67a9d628f8648a0cd64d17a7a13eeba61deba1"
+  integrity sha512-EaHbOVDau9drDNpi/gWUHHaopCh35NMATa+3+9ZmdHokw9kfPiDD5RhGRlXA1aZA0ZfYvqPEbaKuSH3PaCY2Ug==
 
 erc721a@^4.2.3:
   version "4.2.3"
