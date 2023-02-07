@@ -35,6 +35,13 @@ module.exports = async ({
 
   console.log('ClaimableNFT address: ', ClaimableNFT.address);
 
+  if (networkName !== 'hardhat') {
+    await hre.tenderly.verify({
+      name: 'ClaimableNFT',
+      address: ClaimableNFT.implementation,
+    });
+  }
+
   
 
 };
