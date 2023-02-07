@@ -10,6 +10,8 @@
     "erc721a": "^4.2.3",
     "erc721a-upgradeable": "^4.2.3",
     "hardhat": "^2.12.6",
+    "hardhat-deploy": "^0.11.23",
+    "hardhat-deploy-ethers": "^0.3.0-beta.13",
     "solady": "^0.0.74"
   },
   "devDependencies": {

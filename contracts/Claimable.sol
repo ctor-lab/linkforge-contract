@@ -29,8 +29,9 @@ abstract contract Claimable is GelatoRelayContext{
 
     function claimThroughRelay(address claimant, address signer, uint64 deadline, bytes calldata data, bytes calldata signature, bytes calldata certificate) 
         external onlyGelatoRelay {
+
         if (!gelatoRelayEnabled) revert GelatoRelayNotEnabled();
-        
+
         claim(claimant, signer, deadline, data, signature, certificate);
         
         _beforeTransferRelayFee();
@@ -79,5 +80,4 @@ abstract contract Claimable is GelatoRelayContext{
         if(ECDSAUpgradeable.recover(signautureHash, signature) != signer) revert InvalidSignature();
     }
 
-    function withdrawIERC20() {}
 }
