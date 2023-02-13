@@ -31,18 +31,18 @@ abstract contract Claimable is GelatoRelayContext{
         external onlyGelatoRelay {
 
         if (!gelatoRelayEnabled) revert GelatoRelayNotEnabled();
+        
+        _beforeTransferRelayFee(claimant, data);
+        _transferRelayFee();
 
         claim(claimant, signer, deadline, data, signature, certificate);
-        
-        _beforeTransferRelayFee();
-        _transferRelayFee();
     }
 
 
     function _processClaim(address claimant, bytes calldata data) internal virtual;
 
 
-    function _beforeTransferRelayFee() internal virtual {}
+    function _beforeTransferRelayFee(address claimant, bytes calldata data) internal virtual {}
 
     function isUsedSigner(address signer) public view returns (bool) {
         return usedSigner[signer];
