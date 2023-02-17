@@ -33,6 +33,10 @@ contract Claimable1155 is ClaimableCore, ERC1155Upgradeable {
         
     }
 
+    function toggleGelatoRelay() external onlyOwner {
+        gelatoRelayEnabled = !gelatoRelayEnabled;
+    }
+
     function _max_mint_gasusage() internal virtual returns(uint256) {
         return 50000;
     }
