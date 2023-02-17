@@ -4,15 +4,15 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
+import {NATIVE_TOKEN} from  "@gelatonetwork/relay-context/contracts/constants/Tokens.sol";
+
 import "./ClaimableCore.sol";
 
 import "./IFactory.sol";
 
 
 contract Claimable1155 is ClaimableCore, ERC1155Upgradeable {
-
-    address private constant NATIVE_TOKEN = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    
+ 
     string public name;
     string public symbol;
 
