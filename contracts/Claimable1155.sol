@@ -63,7 +63,6 @@ contract Claimable1155 is ClaimableCore, ERC1155Upgradeable {
             // By capping the gas usage for the mint, this prevents the griefing attack by using a smart contact as the clamant.
             if (beforeGas - afterGas > _max_mint_gasusage()) revert();
 
-
             address token = _getFeeToken();
 
             uint256 fee = IFactory(factory).getFee(token);

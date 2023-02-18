@@ -16,7 +16,7 @@ abstract contract Claimable is GelatoRelayContext{
     error InvalidSignature();
     error GelatoRelayNotEnabled();
 
-    function claim(address claimant, address signer, uint64 deadline, bytes calldata data, bytes calldata signature, bytes calldata certificate) public {
+    function claim(address claimant, address signer, uint64 deadline, bytes calldata data, bytes calldata signature, bytes calldata certificate) public payable {
         bytes32 certificateHash = _verifyCertificate(signer, deadline, data, certificate);
         _verySignature(claimant, certificateHash, signer, signature);
 

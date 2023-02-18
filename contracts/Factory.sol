@@ -11,6 +11,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
 import "./IClaimable1155.sol";
 import "./IFactory.sol";
 
+
 contract Factory is IFactory, OwnableUpgradeable {
     address public implementation;
 
