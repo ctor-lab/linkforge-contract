@@ -10,8 +10,10 @@ import "./ClaimableCore.sol";
 
 import "./IFactory.sol";
 
+import "./IClaimable1155.sol";
 
-contract Claimable1155 is ClaimableCore, ERC1155Upgradeable {
+
+contract Claimable1155 is IClaimable1155, ClaimableCore, ERC1155Upgradeable {
  
     string public name;
     string public symbol;
