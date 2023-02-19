@@ -35,6 +35,10 @@ contract Claimable1155 is IClaimable1155, ClaimableCore, ERC1155Upgradeable {
         
     }
 
+    function devMint(address to, uint256 id, uint256 amount) external onlyOwner {
+        _mint(to, id, amount, "");
+    }
+
     function toggleGelatoRelay() external onlyOwner {
         gelatoRelayEnabled = !gelatoRelayEnabled;
     }
