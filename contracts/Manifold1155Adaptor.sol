@@ -63,7 +63,7 @@ contract Manifold1155Adaptor is IManifold1155Adaptor, ClaimableCore {
 
         uint256 beforeGas = gasleft();
 
-        IERC1155CreatorCore(creator).mintBaseExisting(
+        IERC1155CreatorCore(creator).mintExtensionExisting(
             to, tokenIds, amounts
         );
 
