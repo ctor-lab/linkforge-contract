@@ -3,10 +3,13 @@ pragma solidity ^0.8.9;
 
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/interfaces/IERC165.sol";
+
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-
 import "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
+
+import "@manifoldxyz/creator-core-solidity/contracts/core/IERC1155CreatorCore.sol";
 
 import "./IManifold1155Adaptor.sol";
 import "./IFactory.sol";
@@ -28,13 +31,15 @@ contract FactoryManifoldAdaptor is IFactory, OwnableUpgradeable {
         address creator_,
         bool gelatoRelayEnabled_,
         address certificateAuthority_
-    ) external {
-        address nft = ClonesUpgradeable.clone(implementation);
+    ) external returns (address) {
+        require(
+            IERC165(creator_).supportsInterface(type(IERC1155CreatorCore).interfaceId),
+            "FactoryManifoldAdaptor: Not a ERC1155CreatorCore contract."
+        );
 
+        address nft = ClonesUpgradeable.clone(implementation);
         IManifold1155Adaptor(nft).initialize(creator_, gelatoRelayEnabled_, 
             certificateAuthority_, address(this));
-
-
         OwnableUpgradeable(nft).transferOwnership(msg.sender);
     }
 
@@ -55,5 +60,4 @@ contract FactoryManifoldAdaptor is IFactory, OwnableUpgradeable {
     function withdraw(uint256 amount) external onlyOwner {
         payable(msg.sender).transfer(amount);
     }
-
 }
