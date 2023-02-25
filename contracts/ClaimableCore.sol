@@ -7,11 +7,10 @@ import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import "./Claimable.sol";
+import "./ClaimableBase.sol";
 
 
-abstract contract ClaimableCore is Claimable, OwnableUpgradeable {
-    address public factory;
+abstract contract ClaimableCore is ClaimableBase, OwnableUpgradeable {
 
     constructor() {
         _disableInitializers();
@@ -19,17 +18,28 @@ abstract contract ClaimableCore is Claimable, OwnableUpgradeable {
 
     function __ClaimableCore_init(
         bool gelatoRelayEnabled_,
-        address certificateAuthority_,
-        address factory_
+        address certificateAuthority_
     ) internal onlyInitializing {
-        gelatoRelayEnabled = gelatoRelayEnabled_;
+        ClaimableBaseStorage.layout().gelatoRelayEnabled = gelatoRelayEnabled_;
         _setDefaultCertificateAuthority(certificateAuthority_);
         __Ownable_init();
-        factory = factory_;
+    }
+
+    function toggleGelatoRelayEnabled() external onlyOwner {
+        ClaimableBaseStorage.layout().gelatoRelayEnabled = !ClaimableBaseStorage.layout().gelatoRelayEnabled;
     }
 
     function setCertificateAuthority(address certificateAuthority_) external onlyOwner {
         _setDefaultCertificateAuthority(certificateAuthority_);
+    }
+
+    function revokeSigners(address[] calldata signers) external onlyOwner {
+        for(uint256 i=0;i<signers.length;) {
+            _revoke(signers[i]);
+            unchecked {
+                ++i;
+            }
+        }
     }
 
     receive() external payable {}

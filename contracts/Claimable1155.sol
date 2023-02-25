@@ -8,20 +8,33 @@ import {NATIVE_TOKEN} from  "@gelatonetwork/relay-context/contracts/constants/To
 
 import "./ClaimableCore.sol";
 
-import "./IFactory.sol";
-
-import "./IClaimable1155.sol";
+import "./interfaces/IFactory.sol";
+import "./interfaces/IClaimable1155.sol";
 
 import "closedsea/src/OperatorFilterer.sol";
 
 
+library Claimable1155Storage {
+    bytes32 internal constant STORAGE_SLOT = keccak256('CtrLab.contracts.storage.Claimable1155');
+
+    struct Layout {
+        address factory;
+        string name;
+        string symbol;
+        string defaultURI;
+        mapping(uint256 => string) uri;
+    }
+
+    function layout() internal pure returns (Layout storage l) {
+        bytes32 slot = STORAGE_SLOT;
+        assembly {
+            l.slot := slot
+        }
+    }
+}
+
 contract Claimable1155 is IClaimable1155, ClaimableCore, ERC1155Upgradeable, OperatorFilterer {
- 
-    string public name;
-    string public symbol;
-
-    mapping(uint256 => string) private _uri;
-
+    
     function initialize(
         string calldata name_,
         string calldata symbol_,
@@ -30,19 +43,27 @@ contract Claimable1155 is IClaimable1155, ClaimableCore, ERC1155Upgradeable, Ope
         address factory_
     ) initializer external {
         __ERC1155_init("");
-        name = name_;
-        symbol = symbol_;
+        Claimable1155Storage.layout().name = name_;
+        Claimable1155Storage.layout().symbol = symbol_;
+        Claimable1155Storage.layout().factory = factory_;
 
-        __ClaimableCore_init(gelatoRelayEnabled_, certificateAuthority_, factory_);
-        
+        __ClaimableCore_init(gelatoRelayEnabled_, certificateAuthority_);
+    }
+
+    function name() public view returns (string memory) {
+        return Claimable1155Storage.layout().name;
+    }
+
+    function symbol() public view returns (string memory) {
+        return Claimable1155Storage.layout().symbol;
+    }
+
+    function factory() public view returns (address) {
+        return Claimable1155Storage.layout().factory;
     }
 
     function devMint(address to, uint256 id, uint256 amount) external onlyOwner {
         _mint(to, id, amount, "");
-    }
-
-    function toggleGelatoRelay() external onlyOwner {
-        gelatoRelayEnabled = !gelatoRelayEnabled;
     }
 
     function _max_mint_gasusage() internal virtual returns(uint256) {
@@ -50,12 +71,19 @@ contract Claimable1155 is IClaimable1155, ClaimableCore, ERC1155Upgradeable, Ope
     }
 
     function uri(uint256 id) public view override returns(string memory) {
-        return _uri[id];
+        if(bytes(Claimable1155Storage.layout().uri[id]).length > 0) {
+            return Claimable1155Storage.layout().uri[id];
+        }
+        return Claimable1155Storage.layout().defaultURI;
     }
 
     function setUri(uint256 id, string calldata uri_) external onlyOwner {
-        _uri[id] = uri_;
+        Claimable1155Storage.layout().uri[id] = uri_;
         emit URI(uri_, id);
+    }
+
+    function setDefaultUri(string calldata defaultURI_) external onlyOwner {
+        Claimable1155Storage.layout().defaultURI = defaultURI_;
     }
 
     function _processClaim(address claimant, bytes calldata data) internal virtual override {
@@ -73,13 +101,17 @@ contract Claimable1155 is IClaimable1155, ClaimableCore, ERC1155Upgradeable, Ope
 
             address token = _getFeeToken();
 
-            uint256 fee = IFactory(factory).getFee(token);
+            uint256 fee = 0;
+            address factory_ = factory();
+            if(factory_ != address(0)) {
+                IFactory(factory_).getFee(token);
 
-            if(fee > 0) {
-                if(token == NATIVE_TOKEN) {
-                    payable(factory).transfer(fee);
-                } else {
-                    IERC20(token).transfer(factory, fee);
+                if(fee > 0) {
+                    if(token == NATIVE_TOKEN) {
+                        payable(factory_).transfer(fee);
+                    } else {
+                        IERC20(token).transfer(factory_, fee);
+                    }
                 }
             }
         } 

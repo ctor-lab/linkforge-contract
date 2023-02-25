@@ -8,8 +8,8 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
 
-import "./IClaimable1155.sol";
-import "./IFactory.sol";
+import "./interfaces/IClaimable1155.sol";
+import "./interfaces/IFactory.sol";
 
 
 contract Factory is IFactory, OwnableUpgradeable {
@@ -34,7 +34,6 @@ contract Factory is IFactory, OwnableUpgradeable {
 
         IClaimable1155(nft).initialize(name_, symbol_, gelatoRelayEnabled_, 
             certificateAuthority_, address(this));
-
 
         OwnableUpgradeable(nft).transferOwnership(msg.sender);
     }

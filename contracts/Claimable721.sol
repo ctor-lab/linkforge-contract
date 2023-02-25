@@ -9,20 +9,21 @@ import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "erc721a-upgradeable/contracts/ERC721AUpgradeable.sol";
-import "./Claimable.sol";
+import "./ClaimableCore.sol";
 
-contract ClaimableNFT is OwnableUpgradeable, Claimable, ERC721AUpgradeable {
-
-    constructor() {
-        _disableInitializers();
-    }
+contract Claimable721 is ClaimableCore, ERC721AUpgradeable {
 
     function initialize(
-        bool gelatoRelayEnabled_,
         string calldata name_,
-        string calldata symbol_
+        string calldata symbol_,
+        bool gelatoRelayEnabled_,
+        address certificateAuthority_
     ) initializerERC721A initializer public {
-        gelatoRelayEnabled = gelatoRelayEnabled_;
+        __ClaimableCore_init(
+            gelatoRelayEnabled_,
+            certificateAuthority_
+        );
+
         __ERC721A_init(name_, symbol_);
         __Ownable_init();
     }
@@ -31,22 +32,8 @@ contract ClaimableNFT is OwnableUpgradeable, Claimable, ERC721AUpgradeable {
         return "ipfs://";
     }
 
-    function setCertificateAuthority(address certificateAuthority_) external onlyOwner {
-        _setDefaultCertificateAuthority(certificateAuthority_);
-    }
-
     function _processClaim(address claimant, bytes calldata data) internal override {
         _mint(claimant, 1);
     } 
-
-    receive() external payable {}
-
-    function withdrawERC20(IERC20 token, uint256 amount) external onlyOwner {
-        token.transferFrom(address(this), msg.sender, amount);
-    }
-
-    function withdraw(uint256 amount) external onlyOwner {
-        payable(msg.sender).transfer(amount);
-    }
 
 }

@@ -4,33 +4,57 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 import {GelatoRelayContext} from "@gelatonetwork/relay-context/contracts/GelatoRelayContext.sol";
 
-abstract contract Claimable is GelatoRelayContext{
-    bool public gelatoRelayEnabled;
 
-    address private defaultCertificateAuthority;
-    mapping(address => bool) private usedSigner;
+uint256 constant SIGNER_AVAILABLE = 0;
+uint256 constant SIGNER_USED = 1;
+uint256 constant SIGNER_REVOKED = 2;
 
-    error UsedSigner();
+
+library ClaimableBaseStorage {
+    bytes32 internal constant STORAGE_SLOT = keccak256('CtorLab.contracts.storage.ClaimableBase');
+
+    struct Layout {
+        bool gelatoRelayEnabled;
+        address defaultCertificateAuthority;
+        mapping(address=> uint256) signerState;
+    }
+
+    function layout() internal pure returns (Layout storage l) {
+        bytes32 slot = STORAGE_SLOT;
+        assembly {
+            l.slot := slot
+        }
+    }
+}
+
+
+abstract contract ClaimableBase is GelatoRelayContext{
+
+    error InvalidSigner();
     error ZeroAddress();
     error InvalidCertificate();
     error InvalidSignature();
     error GelatoRelayNotEnabled();
 
+    event SignerRevoked(address signer);
+    event SignerUsed(address signer);
+
     function claim(address claimant, address signer, uint64 deadline, bytes calldata data, bytes calldata signature, bytes calldata certificate) public payable {
         bytes32 certificateHash = _verifyCertificate(signer, deadline, data, certificate);
         _verySignature(claimant, certificateHash, signer, signature);
 
-        if(usedSigner[signer]) revert UsedSigner();
+        if(ClaimableBaseStorage.layout().signerState[signer] != SIGNER_AVAILABLE) revert InvalidSigner();
 
-        usedSigner[signer] = true;
+        ClaimableBaseStorage.layout().signerState[signer] = SIGNER_USED;
 
+        emit SignerUsed(signer);
         _processClaim(claimant, data);
     }
 
     function claimThroughRelay(address claimant, address signer, uint64 deadline, bytes calldata data, bytes calldata signature, bytes calldata certificate) 
         external onlyGelatoRelay {
 
-        if (!gelatoRelayEnabled) revert GelatoRelayNotEnabled();
+        if (!ClaimableBaseStorage.layout().gelatoRelayEnabled) revert GelatoRelayNotEnabled();
         
         _beforeTransferRelayFee(claimant, data);
         _transferRelayFee();
@@ -44,17 +68,22 @@ abstract contract Claimable is GelatoRelayContext{
 
     function _beforeTransferRelayFee(address claimant, bytes calldata data) internal virtual {}
 
-    function isUsedSigner(address signer) public view returns (bool) {
-        return usedSigner[signer];
+
+    function signerState(address signer) public view returns (uint256) {
+        return ClaimableBaseStorage.layout().signerState[signer];
     }
 
     function getCertificateAuthority() public virtual view returns (address) {
-        return defaultCertificateAuthority;
+        return ClaimableBaseStorage.layout().defaultCertificateAuthority;
     }
 
     function _setDefaultCertificateAuthority(address certificateAuthority_) internal {
         if(certificateAuthority_ == address(0)) revert ZeroAddress();
-        defaultCertificateAuthority = certificateAuthority_;
+        ClaimableBaseStorage.layout().defaultCertificateAuthority = certificateAuthority_;
+    }
+
+    function gelatoRelayEnabled() public view returns(bool){
+        return ClaimableBaseStorage.layout().gelatoRelayEnabled;
     }
     
 
@@ -80,4 +109,8 @@ abstract contract Claimable is GelatoRelayContext{
         if(ECDSAUpgradeable.recover(signautureHash, signature) != signer) revert InvalidSignature();
     }
 
+    function _revoke(address signer) internal {
+        ClaimableBaseStorage.layout().signerState[signer] = SIGNER_REVOKED;
+        emit SignerRevoked(signer);
+    }
 }
