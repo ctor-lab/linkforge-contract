@@ -12,8 +12,10 @@ import "./IFactory.sol";
 
 import "./IClaimable1155.sol";
 
+import "closedsea/src/OperatorFilterer.sol";
 
-contract Claimable1155 is IClaimable1155, ClaimableCore, ERC1155Upgradeable {
+
+contract Claimable1155 is IClaimable1155, ClaimableCore, ERC1155Upgradeable, OperatorFilterer {
  
     string public name;
     string public symbol;

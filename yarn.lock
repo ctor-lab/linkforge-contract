@@ -1552,6 +1552,11 @@ cliui@^7.0.2:
     strip-ansi "^6.0.0"
     wrap-ansi "^7.0.0"
 
+closedsea@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/closedsea/-/closedsea-1.0.0.tgz#aeee6a266da6e1e53feca5096c8140561a7c6958"
+  integrity sha512-LIE4wGquD1DwpNU8+7zm7jBxXg4/iyFYHjyoGi1auLL7C5trU9IBcK6sagazm7/J0j4JK6a0gFjXMVMDePz20g==
+
 color-convert@^1.9.0:
   version "1.9.3"
   resolved "https://registry.yarnpkg.com/color-convert/-/color-convert-1.9.3.tgz#bb71850690e1f136567de629d2d5471deda4c1e8"
