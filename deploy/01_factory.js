@@ -78,7 +78,4 @@ module.exports = async ({
       address: Factory.implementation,
     });
   }
-
-  
-
 };
