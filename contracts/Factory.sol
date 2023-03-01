@@ -15,7 +15,8 @@ import "./interfaces/IFactory.sol";
 contract Factory is IFactory, OwnableUpgradeable {
     address public implementation;
 
-    mapping(address => uint256) private _fee;
+    mapping(address => uint256) private _feeRelayed;
+    uint256 private _feeSelfClaimed;
 
     function initialize(
         address implementation_
@@ -38,12 +39,20 @@ contract Factory is IFactory, OwnableUpgradeable {
         OwnableUpgradeable(nft).transferOwnership(msg.sender);
     }
 
-    function getFee(address token) public view override returns (uint256){
-        return _fee[token];
+    function getFeeRelayed(address token) public view override returns (uint256){
+        return _feeRelayed[token];
     }
 
-    function setFee(address token, uint256 value) external onlyOwner {
-        _fee[token] = value;
+    function getFeeSelfClaimed() public view override returns (uint256){
+        return _feeSelfClaimed;
+    }
+
+    function setFeeRelayed(address token, uint256 value) external onlyOwner {
+        _feeRelayed[token] = value;
+    }
+
+    function setFeeSelfClaimed(address token, uint256 value) external onlyOwner {
+        _feeRelayed[token] = value;
     }
 
     receive() external payable {}

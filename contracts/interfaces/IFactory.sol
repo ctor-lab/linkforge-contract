@@ -3,5 +3,6 @@ pragma solidity ^0.8.9;
 
 
 interface IFactory {
-    function getFee(address token) external view returns (uint256);
+    function getFeeRelayed(address token) external view returns (uint256);
+    function getFeeSelfClaimed() external view returns(uint256);
 }

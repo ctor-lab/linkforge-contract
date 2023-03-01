@@ -95,6 +95,7 @@ contract Claimable1155 is IClaimable1155, ClaimableCore, ERC1155Upgradeable, Ope
         _mint(claimant, id, amount, "");
         uint256 afterGas = gasleft();
 
+        address factory_ = factory();
         if (_isGelatoRelay(msg.sender)) {
             // By capping the gas usage for the mint, this prevents the griefing attack by using a smart contact as the clamant.
             if (beforeGas - afterGas > _max_mint_gasusage()) revert();
@@ -102,9 +103,9 @@ contract Claimable1155 is IClaimable1155, ClaimableCore, ERC1155Upgradeable, Ope
             address token = _getFeeToken();
 
             uint256 fee = 0;
-            address factory_ = factory();
+            
             if(factory_ != address(0)) {
-                IFactory(factory_).getFee(token);
+                IFactory(factory_).getFeeRelayed(token);
 
                 if(fee > 0) {
                     if(token == NATIVE_TOKEN) {
@@ -114,6 +115,9 @@ contract Claimable1155 is IClaimable1155, ClaimableCore, ERC1155Upgradeable, Ope
                     }
                 }
             }
-        } 
+        } else {
+            require(msg.value == IFactory(factory_).getFeeSelfClaimed());
+            payable(factory_).transfer(msg.value);
+        }
     } 
 }
