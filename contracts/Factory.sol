@@ -5,8 +5,7 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-
-import "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
+import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import "./interfaces/IClaimable1155.sol";
 import "./interfaces/IFactory.sol";
@@ -25,13 +24,13 @@ contract Factory is IFactory, OwnableUpgradeable {
         __Ownable_init();
     }
 
-    function deployWithMinimalProxy(
+    function deploy(
         string calldata name_,
         string calldata symbol_,
         bool gelatoRelayEnabled_,
         address certificateAuthority_
     ) external {
-        address nft = ClonesUpgradeable.clone(implementation);
+        address nft = address(new ERC1967Proxy(implementation, ""));
 
         IClaimable1155(nft).initialize(name_, symbol_, gelatoRelayEnabled_, 
             certificateAuthority_, address(this));
@@ -53,6 +52,10 @@ contract Factory is IFactory, OwnableUpgradeable {
 
     function setFeeSelfClaimed(address token, uint256 value) external onlyOwner {
         _feeRelayed[token] = value;
+    }
+
+    function authorizeUpgrade(address newImplementation) public view {
+        require(newImplementation == implementation);
     }
 
     receive() external payable {}

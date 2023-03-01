@@ -2,6 +2,9 @@
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/common/ERC2981Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import {NATIVE_TOKEN} from  "@gelatonetwork/relay-context/contracts/constants/Tokens.sol";
@@ -12,10 +15,10 @@ import "./interfaces/IFactory.sol";
 import "./interfaces/IClaimable1155.sol";
 
 import "closedsea/src/OperatorFilterer.sol";
-
+import "ctorlab-solidity/contracts/token/ERC2981Lite/ERC2981LiteUpgradeable.sol";
 
 library Claimable1155Storage {
-    bytes32 internal constant STORAGE_SLOT = keccak256('CtrLab.contracts.storage.Claimable1155');
+    bytes32 internal constant STORAGE_SLOT = keccak256('CtorLab.contracts.storage.Claimable1155');
 
     struct Layout {
         address factory;
@@ -33,7 +36,7 @@ library Claimable1155Storage {
     }
 }
 
-contract Claimable1155 is IClaimable1155, ClaimableCore, ERC1155Upgradeable, OperatorFilterer {
+contract Claimable1155 is ClaimableCore, ERC1155Upgradeable, IClaimable1155, OperatorFilterer, ERC2981LiteUpgradeable, UUPSUpgradeable {
     
     function initialize(
         string calldata name_,
@@ -48,6 +51,7 @@ contract Claimable1155 is IClaimable1155, ClaimableCore, ERC1155Upgradeable, Ope
         Claimable1155Storage.layout().factory = factory_;
 
         __ClaimableCore_init(gelatoRelayEnabled_, certificateAuthority_);
+        _registerForOperatorFiltering();
     }
 
     function name() public view returns (string memory) {
@@ -58,12 +62,20 @@ contract Claimable1155 is IClaimable1155, ClaimableCore, ERC1155Upgradeable, Ope
         return Claimable1155Storage.layout().symbol;
     }
 
+    function version() public pure returns (uint256) {
+        return 1;
+    }
+
     function factory() public view returns (address) {
         return Claimable1155Storage.layout().factory;
     }
 
     function devMint(address to, uint256 id, uint256 amount) external onlyOwner {
         _mint(to, id, amount, "");
+    }
+
+    function setRoyalty(address receiver_, uint96 feeNumerator_) external onlyOwner {
+        _setRoyalty(receiver_, feeNumerator_);
     }
 
     function _max_mint_gasusage() internal virtual returns(uint256) {
@@ -120,4 +132,14 @@ contract Claimable1155 is IClaimable1155, ClaimableCore, ERC1155Upgradeable, Ope
             payable(factory_).transfer(msg.value);
         }
     } 
+
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC2981LiteUpgradeable, ERC1155Upgradeable) returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
+
+    // UUPS
+
+    function _authorizeUpgrade(address newImplementation) internal override view onlyOwner {
+        IFactory(factory()).authorizeUpgrade(newImplementation);
+    }
 }
