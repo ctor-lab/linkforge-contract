@@ -7,6 +7,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {NATIVE_TOKEN} from  "@gelatonetwork/relay-context/contracts/constants/Tokens.sol";
 import "solady/src/tokens/ERC1155.sol";
+import "solady/src/tokens/ERC2981.sol";
 import "closedsea/src/OperatorFilterer.sol";
 
 
@@ -14,7 +15,6 @@ import "./LinkForgeCore.sol";
 import "./interfaces/IFactory.sol";
 import "./interfaces/ILinkForge1155.sol";
 
-import "./library/ERC2981.sol";
 
 
 library LinkForge1155Storage {
@@ -196,6 +196,6 @@ contract LinkForge1155 is LinkForgeCore, ERC1155, ILinkForge1155, ERC2981, Opera
     // ERC2981
 
     function setRoyalty(address receiver_, uint96 feeNumerator_) external onlyOwnerOrRoles(_ROLE_ROYALTY_SETTER) {
-        _setRoyalty(receiver_, feeNumerator_);
+        _setDefaultRoyalty(receiver_, feeNumerator_);
     }
 }
