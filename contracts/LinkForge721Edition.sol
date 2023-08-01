@@ -116,7 +116,13 @@ contract LinkForge721Edition is LinkForgeCore, ERC721, ILinkForge721Edition, ERC
             payable(factory()).transfer(msg.value);
         }
     }
-    
+
+    function uri(uint256 edition) public view returns(string memory) {
+        if(bytes(LinkForge721EditionStorage.layout().editionURI[edition]).length > 0) {
+            return LinkForge721EditionStorage.layout().editionURI[edition];
+        }
+        return LinkForge721EditionStorage.layout().defaultURI;
+    }
 
     function defautURI() public view returns(string memory) {
         return LinkForge721EditionStorage.layout().defaultURI;

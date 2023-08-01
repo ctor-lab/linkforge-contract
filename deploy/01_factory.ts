@@ -47,8 +47,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true
   });
 
-
-
   console.log('Factory address: ', Factory.address);
 
   const FactoryContract = await ethers.getContractAt("Factory", Factory.address);
@@ -68,6 +66,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     await hre.tenderly.verify({
       name: 'LinkForge1155',
       address: LinkForge1155.address,
+    });
+
+    await hre.tenderly.verify({
+      name: 'LinkForge721Edition',
+      address: LinkForge721Edition.address,
     });
 
     if(Factory.implementation) {
