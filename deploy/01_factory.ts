@@ -13,14 +13,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log('=============================');
 
 
-  let LinkForge1155 = await deploy('LinkForge1155', {
-    from: deployer.address,
-    gasLimit: 8000000,
-    args: [],
-    log: true
-  });
+  // let LinkForge1155 = await deploy('LinkForge1155', {
+  //   from: deployer.address,
+  //   gasLimit: 8000000,
+  //   args: [],
+  //   log: true
+  // });
 
-  console.log('LinkForge1155 address: ', LinkForge1155.address);
+  // console.log('LinkForge1155 address: ', LinkForge1155.address);
 
   let LinkForge721Edition = await deploy('LinkForge721Edition', {
     from: deployer.address,
@@ -52,10 +52,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const FactoryContract = await ethers.getContractAt("Factory", Factory.address);
 
 
-  if(await FactoryContract.implementation() != LinkForge1155.address) {
-    await FactoryContract.setImplementation(LinkForge1155.address);
-    console.log("LinkForge1155 Implementation Updated")
-  }
+  // if(await FactoryContract.implementation() != LinkForge1155.address) {
+  //   await FactoryContract.setImplementation(LinkForge1155.address);
+  //   console.log("LinkForge1155 Implementation Updated")
+  // }
 
   if(await FactoryContract.implementationLinkForge721Edition() != LinkForge721Edition.address) {
     await FactoryContract.setImplementationLinkForge721Edition(LinkForge721Edition.address);
@@ -63,10 +63,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   if (hre.network.name !== 'hardhat') {
-    await hre.tenderly.verify({
-      name: 'LinkForge1155',
-      address: LinkForge1155.address,
-    });
+    // await hre.tenderly.verify({
+    //   name: 'LinkForge1155',
+    //   address: LinkForge1155.address,
+    // });
 
     await hre.tenderly.verify({
       name: 'LinkForge721Edition',
