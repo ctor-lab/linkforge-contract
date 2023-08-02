@@ -68,8 +68,9 @@ contract LinkForge721Edition is LinkForgeCore, ERC721, ILinkForge721Edition, ERC
     }
 
     function _mintEdition(address to, uint256 edition, uint256 amount) internal {
-        uint256 start = LinkForge721EditionStorage.layout().editionCounter[edition];
-        require(start + amount <=  TOKEN_ID_SEPARATOR);
+        uint256 minted = LinkForge721EditionStorage.layout().editionCounter[edition];
+        require(minted + amount <=  TOKEN_ID_SEPARATOR);
+        uint256 start = TOKEN_ID_SEPARATOR * edition + minted;
         for(uint256 i = 0; i < amount; ++i) {
             uint256 tokenId = start + i;
             _mint(to, tokenId);
