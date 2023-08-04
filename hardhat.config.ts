@@ -28,6 +28,7 @@ const config: HardhatUserConfig =  {
     polygon: {
       url: 'https://polygon.rpc.thirdweb.com',
       accounts: [`0x${process.env.PRIVATE_KEY}`],
+      gasPrice: 100_000_000_000
     },
     mumbai: {
       url: 'https://polygon-mumbai.g.alchemy.com/v2/DK2lMR_zdFakSO2hWXhfogKKkfh9XZZT',

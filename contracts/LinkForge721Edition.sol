@@ -139,6 +139,9 @@ contract LinkForge721Edition is LinkForgeCore, ERC721, ILinkForge721Edition, ERC
             (uint256, uint256)
         );
 
+        uint256 tokenIdStart = TOKEN_ID_SEPARATOR * edition + 
+            LinkForge721EditionStorage.layout().editionCounter[edition];
+
         _mintEdition(recepiant, edition, amount);
     
         address factory_ = factory();
@@ -161,12 +164,12 @@ contract LinkForge721Edition is LinkForgeCore, ERC721, ILinkForge721Edition, ERC
                 }
             }
 
-            emit Claimed(recepiant, edition, amount, token, fee + _getFee());
+            emit Claimed(recepiant, tokenIdStart, amount, token, fee + _getFee());
         } else {
             require(msg.value == IFactory(factory_).getFeeSelfClaimed());
             fee = msg.value;
             payable(factory_).transfer(msg.value);
-            emit Claimed(recepiant, edition, amount, address(0), 0);
+            emit Claimed(recepiant, tokenIdStart, amount, address(0), 0);
         }        
     } 
 

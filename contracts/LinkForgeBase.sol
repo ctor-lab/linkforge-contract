@@ -51,8 +51,8 @@ abstract contract LinkForgeBase is GelatoRelayContext{
             revert InvalidSigner();
         } else if(signerState_ == SIGNER_AVAILABLE) {
             LinkForgeBaseStorage.layout().signerState[signer] = SIGNER_USED;
-            emit SignerUsed(signer);
         }
+        emit SignerUsed(signer);
         
         _processClaim(recepiant, data);
     }
