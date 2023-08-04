@@ -22,6 +22,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   console.log('LinkForge1155 address: ', LinkForge1155.address);
 
+  let LinkForge721Edition = await deploy('LinkForge721Edition', {
+    from: deployer.address,
+    gasLimit: 8000000,
+    args: [],
+    log: true
+  });
+
+  console.log('LinkForge721Edition address: ', LinkForge721Edition.address); 
+
   let Factory = await deploy('Factory', {
     from: deployer.address,
     gasLimit: 4000000,
@@ -29,7 +38,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       execute: {
         init: {
           methodName: 'initialize',
-          args: [LinkForge1155.address],
+          args: [LinkForge1155.address, LinkForge721Edition.address],
         },
       },
       proxyContract: 'OpenZeppelinTransparentProxy',
@@ -38,8 +47,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true
   });
 
-
-
   console.log('Factory address: ', Factory.address);
 
   const FactoryContract = await ethers.getContractAt("Factory", Factory.address);
@@ -47,13 +54,23 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   if(await FactoryContract.implementation() != LinkForge1155.address) {
     await FactoryContract.setImplementation(LinkForge1155.address);
-    console.log("Implementation Updated")
+    console.log("LinkForge1155 Implementation Updated")
+  }
+
+  if(await FactoryContract.implementationLinkForge721Edition() != LinkForge721Edition.address) {
+    await FactoryContract.setImplementationLinkForge721Edition(LinkForge721Edition.address);
+    console.log("LinkForge721Edition Implementation Updated")
   }
 
   if (hre.network.name !== 'hardhat') {
     await hre.tenderly.verify({
       name: 'LinkForge1155',
       address: LinkForge1155.address,
+    });
+
+    await hre.tenderly.verify({
+      name: 'LinkForge721Edition',
+      address: LinkForge721Edition.address,
     });
 
     if(Factory.implementation) {
