@@ -97,7 +97,7 @@ abstract contract LinkForgePlus is GelatoRelayContext{
 }
 
 
-
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "solady/src/auth/OwnableRoles.sol";
 import "solady/src/utils/LibString.sol";
@@ -105,15 +105,20 @@ import "solady/src/tokens/ERC721.sol";
 
 import "erc721a-upgradeable/contracts/ERC721A__Initializable.sol";
 
+
 library LinkForgePlus721AStorage {
+    
     bytes32 internal constant STORAGE_SLOT = keccak256('CtorLab.storage.contracts.LinkForgePlus721A');
 
 
     struct Layout {
+        string name;
+        string symbol;
+        string defaultURI;
         mapping(uint256 => address) tokenSigner;
         mapping(uint256 => uint256) edition;
         mapping(uint256 => string) editionURI;
-        string defaultURI;
+        mapping(uint256 => uint256) editionCounter;
     }
 
     function layout() internal pure returns (Layout storage l) {
@@ -125,25 +130,46 @@ library LinkForgePlus721AStorage {
 }
 
 
-abstract contract LinkForgePlus721PBT is LinkForgePlus, OwnableRoles, ERC721A__Initializable, ERC721 {
+abstract contract LinkForgePlus721PBT is LinkForgePlus, OwnableRoles, ERC721A__Initializable, ERC721, UUPSUpgradeable {
     event URI(string value, uint256 indexed id);
     event TokenConfigured(uint256 indexed id, address signer, uint256 edition);
 
     error TokenAlreadyConfigured();
 
+    uint256 constant TOKEN_ID_SEPARATOR = 1_000_000;
+
     uint256 constant _ROLE_MINTER =  _ROLE_0;
     uint256 constant _ROLE_URL_SETTER =  _ROLE_1;
     //uint256 constant _ROLE_ROYALTY_SETTER = _ROLE_2;
 
+
+    constructor() initializerERC721A {}
+
     function initialize(
-        bool gelatoRelayEnabled_
+        bool gelatoRelayEnabled_,
+        string calldata name_,
+        string calldata symbol_
     ) internal initializerERC721A {
         LinkForgePlusStorage.layout().gelatoRelayEnabled = gelatoRelayEnabled_;
         _initializeOwner(msg.sender);
+        layout().name = name_;
+        layout().symbol = symbol_;
     }
 
     function layout() private pure returns(LinkForgePlus721AStorage.Layout storage) {
         return LinkForgePlus721AStorage.layout();
+    }
+
+    function name() public view override returns (string memory) {
+        return layout().name;
+    }
+
+    function symbol() public view override returns (string memory) {
+        return layout().symbol;
+    }
+
+    function version() public pure returns (uint256) {
+        return 1;
     }
 
 
@@ -162,19 +188,21 @@ abstract contract LinkForgePlus721PBT is LinkForgePlus, OwnableRoles, ERC721A__I
     }
 
 
-    function setTokens(
+    function addTokens(
         bool mint,
-        uint256[] calldata tokenIds, 
-        address[] calldata signers,
-        uint256[] calldata editions
+        uint256 edition,
+        address[] calldata signers
     ) external onlyOwnerOrRoles(_ROLE_MINTER) {
-        for(uint256 i=0; i< tokenIds.length; i++) {
-            address signer = signers[i];
-            uint256 tokenId = tokenIds[i];
-            uint256 edition = editions[i];
+        uint256 amount = signers.length;
+        uint256 added = layout().editionCounter[edition];
+        require(added + amount <=  TOKEN_ID_SEPARATOR);
+        uint256 start = TOKEN_ID_SEPARATOR * edition + added;
 
+        for(uint256 i = 0; i < amount; ++i) {
+            uint256 tokenId = start + i;
+            address signer = signers[i];
             layout().tokenSigner[tokenId] = signer;
-            layout().edition[tokenId] = edition;
+
             if(mint) {
                 _mint(address(this), tokenId);
             }
@@ -216,6 +244,12 @@ abstract contract LinkForgePlus721PBT is LinkForgePlus, OwnableRoles, ERC721A__I
 
     function withdraw(uint256 amount) external onlyOwner {
         payable(msg.sender).transfer(amount);
+    }
+
+    // UUPS
+
+    function _authorizeUpgrade(address newImplementation) internal override view onlyOwner {
+        //IFactory(factory()).authorizeUpgrade721Edition(newImplementation);
     }
 
 
